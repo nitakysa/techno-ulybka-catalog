@@ -1,1 +1,458 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог товаров «ТЕХНОУЛЫБКА»</title>
+    <style>
+        /* --- ОСНОВНЫЕ СТИЛИ --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: #f0f4f8; padding: 30px 20px; }
+        .container { max-width: 1300px; margin: 0 auto; }
 
+        /* --- ШАПКА --- */
+        .header-brand { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
+        .header-brand .logo-icon { font-size: 44px; line-height: 1; }
+        .header-brand h1 { font-size: 38px; font-weight: 700; letter-spacing: -0.5px; }
+        .header-brand h1 .brand-text { background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #991b1b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .sub { color: #475569; font-size: 18px; font-weight: 400; margin-bottom: 25px; padding-left: 58px; }
+        .sub strong { color: #1e293b; font-weight: 600; }
+
+        /* --- ПАНЕЛЬ ИНСТРУМЕНТОВ --- */
+        .toolbar { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; margin-bottom: 30px; background: #ffffffcc; backdrop-filter: blur(4px); padding: 12px 20px; border-radius: 60px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
+        .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+        .filters button { background: transparent; border: 1.5px solid #e2e8f0; padding: 6px 18px; border-radius: 30px; cursor: pointer; font-size: 14px; transition: 0.2s; font-weight: 500; color: #334155; }
+        .filters button:hover { background: #e2e8f0; }
+        .filters button.active { background: #1e293b; color: #fff; border-color: #1e293b; }
+        .search input { padding: 9px 18px; border-radius: 30px; border: 1.5px solid #e2e8f0; font-size: 15px; outline: none; width: 240px; background: #fff; transition: 0.2s; }
+        .search input:focus { border-color: #38bdf8; box-shadow: 0 0 0 3px #38bdf840; }
+        .btn-pdf { background: #991b1b; color: #fff; border: none; padding: 10px 28px; border-radius: 30px; font-weight: 600; font-size: 15px; cursor: pointer; transition: 0.2s; margin-left: auto; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px #991b1b40; }
+        .btn-pdf:hover { background: #7f1d1d; transform: scale(1.02); box-shadow: 0 6px 20px #991b1b60; }
+        .btn-pdf:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* --- КАТЕГОРИИ --- */
+        .category-title { font-size: 28px; font-weight: 600; margin: 40px 0 20px; padding-bottom: 10px; border-bottom: 4px solid #38bdf8; color: #0f172a; display: flex; align-items: center; gap: 12px; }
+        .category-title::before { content: "▌"; color: #991b1b; font-size: 32px; }
+
+        /* --- СЕТКА КАРТОЧЕК --- */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
+        .card { background: #fff; border-radius: 20px; overflow: hidden; transition: 0.25s ease; display: flex; flex-direction: column; border-top: 5px solid #991b1b; box-shadow: 0 4px 14px rgba(0,0,0,0.04); }
+        .card:hover { transform: translateY(-6px); box-shadow: 0 16px 36px #38bdf820, 0 4px 14px rgba(0,0,0,0.06); }
+
+        /* --- КАРУСЕЛЬ (СЛАЙДЕР) --- */
+        .carousel-container { position: relative; width: 100%; height: 190px; background: #e9edf2; overflow: hidden; }
+        .carousel-slides { display: flex; width: 100%; height: 100%; transition: transform 0.4s ease-in-out; }
+        .carousel-slide { min-width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        .carousel-slide img { width: 100%; height: 100%; object-fit: cover; }
+        .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: #fff; border: none; padding: 8px 12px; cursor: pointer; font-size: 18px; z-index: 10; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .carousel-btn:hover { background: rgba(0,0,0,0.8); }
+        .carousel-btn.prev { left: 6px; }
+        .carousel-btn.next { right: 6px; }
+        .carousel-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 10; }
+        .carousel-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.5); border: none; cursor: pointer; padding: 0; transition: 0.2s; }
+        .carousel-dot.active { background: #fff; transform: scale(1.2); }
+
+        /* --- КАРТОЧКА ТОВАРА --- */
+        .card-body { padding: 16px 18px 20px; flex: 1; display: flex; flex-direction: column; }
+        .card-body .name { font-weight: 600; font-size: 16px; color: #0f172a; margin-bottom: 2px; line-height: 1.4; }
+        .card-body .article { font-size: 12px; color: #94a3b8; margin-bottom: 6px; font-weight: 400; }
+        .card-body .qty { font-size: 14px; color: #475569; margin-bottom: 4px; }
+        .card-body .price { font-size: 18px; font-weight: 700; color: #0f172a; margin-top: 6px; }
+        .card-body .price span { font-weight: 400; font-size: 14px; color: #64748b; }
+        .card-body .link-btn { margin-top: 12px; display: inline-block; background: #1e3a5f; color: #fff; text-decoration: none; padding: 8px 18px; border-radius: 30px; font-size: 14px; font-weight: 600; transition: 0.2s; text-align: center; align-self: flex-start; border: none; cursor: pointer; }
+        .card-body .link-btn:hover { background: #0f172a; transform: scale(1.02); box-shadow: 0 4px 12px #1e3a5f60; }
+        .card-body .no-link { margin-top: 12px; font-size: 13px; color: #94a3b8; font-style: italic; }
+
+        /* --- ПОДВАЛ --- */
+        .footer { margin-top: 50px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center; color: #94a3b8; font-size: 14px; }
+        .footer .brand-name { font-weight: 700; font-size: 18px; letter-spacing: 1px; }
+        .footer .brand-name .brand-blue { color: #1e3a5f; }
+        .footer .brand-name .brand-red { color: #991b1b; }
+
+        /* --- ДЛЯ ИЗОБРАЖЕНИЙ БЕЗ ФОТО --- */
+        .card-img-placeholder { width: 100%; height: 190px; background: #e9edf2; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 14px; }
+
+        @media print { .toolbar { display: none !important; } .card { break-inside: avoid; page-break-inside: avoid; } body { background: #fff; padding: 15px; } .grid { gap: 16px; } .header-brand h1 { font-size: 28px; } .sub { padding-left: 0; font-size: 16px; } .link-btn { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+        @media (max-width: 600px) { .header-brand h1 { font-size: 24px; } .grid { grid-template-columns: 1fr 1fr; } .toolbar { flex-direction: column; align-items: stretch; border-radius: 24px; padding: 16px; } .btn-pdf { margin-left: 0; justify-content: center; } .search input { width: 100%; } .sub { padding-left: 0; font-size: 15px; } .header-brand .logo-icon { font-size: 32px; } }
+    </style>
+</head>
+<body>
+<div class="container" id="catalogContainerRoot">
+
+    <!-- ШАПКА -->
+    <div class="header-brand">
+        <div class="logo-icon">💡</div>
+        <h1>Каталог товаров <span class="brand-text">«ТЕХНОУЛЫБКА»</span></h1>
+    </div>
+    <div class="sub">
+        ⚡ <strong>Всё для оснащения клиник и офисов</strong> — в наличии, с ценами и остатками<br>
+        <span style="font-size:15px; color:#64748b;">📍 Изображения • Мебель • Сантехника • Двери • Свет</span>
+    </div>
+
+    <!-- ПАНЕЛЬ УПРАВЛЕНИЯ -->
+    <div class="toolbar">
+        <div class="search"><input type="text" id="searchInput" placeholder="🔍 Поиск по названию или артикулу..." oninput="filterCards()" /></div>
+        <div class="filters" id="filterButtons">
+            <button class="active" data-cat="all">Все</button>
+            <button data-cat="Двери">Двери</button>
+            <button data-cat="Рециркуляторы">Рециркуляторы</button>
+            <button data-cat="Светильники">Светильники</button>
+            <button data-cat="Радиаторы">Радиаторы</button>
+            <button data-cat="Сантехника">Сантехника</button>
+            <button data-cat="Зеркала">Зеркала</button>
+            <button data-cat="Мебель">Мебель</button>
+        </div>
+        <button class="btn-pdf" id="pdfBtn" onclick="exportPDF()">📄 Скачать PDF</button>
+    </div>
+
+    <!-- КОНТЕЙНЕР ДЛЯ КАРТОЧЕК -->
+    <div id="catalogContainer"></div>
+
+    <!-- ПОДВАЛ -->
+    <div class="footer">
+        <div class="brand-name">💼 <span class="brand-blue">ТЕХНО</span><span class="brand-red">УЛЫБКА</span></div>
+        <div style="margin-top:4px;">Данные актуальны на август 2026</div>
+    </div>
+</div>
+
+<script>
+    // ================================================================
+    // ДАННЫЕ ТОВАРОВ С ЛОКАЛЬНЫМИ ПУТЯМИ К ИЗОБРАЖЕНИЯМ
+    // ================================================================
+    const data = [
+        // ===== ДВЕРИ =====
+        { category: "Двери", name: "Дверь модульная Nuovo 50 (ВВ-1, Умывальная)", article: "ВВ-1", qty: 4, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Дверь модульная Nuovo 50 (ВВ-27, Сное помещение координатор #1)", article: "ВВ-27", qty: 3, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Дверь модульная Nuovo 50 (ВР-1, Коридор)", article: "ВР-1", qty: 1, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Дверь модульная Next (НС-1, Кача-стоматолога №1)", article: "НС-1", qty: 5, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Дверь модульная Nuovo 50 (ВВ-24, Каретка)", article: "ВВ-24", qty: 1, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Дверь модульная Next (НС-7, Коридор с зоной ожидания детства)", article: "НС-7", qty: 2, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Дверь модульная Nuovo 50 (ВВ-21, Помещение медгазов)", article: "ВВ-21", qty: 1, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Дверь модульная Nuovo 50 (ВВ-23, Служебное пом. зубтехника)", article: "ВВ-23", qty: 2, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Дверь модульная Nuovo 50 (ДВ-17, Малая стоматологическая операционная)", article: "ДВ-17", qty: 1, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Дверь модульная Nuovo 50 (ВТ-20, НР)", article: "ВТ-20", qty: 1, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Дверь модульная Nuovo 50 (ВТ-19, КПК)", article: "ВТ-19", qty: 3, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Дверь модульная Nuovo 50 (ВВ-15, Помещение временного хранения отходов)", article: "ВВ-15", qty: 3, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Дверь модульная Nuovo 50 (ВТ-13, персоналка)", article: "ВВ-13", qty: 2, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Дверь модульная Nuovo 50 (ВВ-8, персоналка)", article: "ВВ-8", qty: 2, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Дверь модульная Nuovo 50 (ВП-6, Подсобное пом. компрессорная)", article: "ВП-6", qty: 1, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Дверь модульная Nuovo 50 (ВВ-5, Сное помещение серверная)", article: "ВВ-5", qty: 3, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Рама для стерилизационной, модуль Cristal", article: "НС-4", qty: 1, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Рост TUPAI SQURE 2275 5S Q", article: "TUPAI SQURE 2275 5S Q", qty: 38, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Фиксатор WC, матовый никель", article: "", qty: 8, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Накладка под цилиндр (комплект), матовый никель", article: "", qty: 4, price: "по запросу", img: [], link: "" },
+        { category: "Двери", name: "Цилиндр", article: "", qty: 4, price: "по запросу", img: [], link: "" },
+
+        // ===== РЕЦИРКУЛЯТОРЫ =====
+        { category: "Рециркуляторы", name: "Облучатель воздуха А-04Б (настольный, 2 лампы, 45 м³/ч)", article: "УФ-00012800 / А-04Б", qty: 1, price: "13 000 ₽", img: [], link: "https://www.avito.ru/moskva/krasota_i_zdorove/retsirkulyatory_vozduha_8279698955" },
+        { category: "Рециркуляторы", name: "Облучатель воздуха А-05Б (горизонтальный, 4 лампы, 90 м³/ч)", article: "УФ-00118102 / А-05Н", qty: 12, price: "17 000 ₽", img: [], link: "https://www.avito.ru/moskva/krasota_i_zdorove/retsirkulyatory_vozduha_8279698955" },
+
+        // ===== СВЕТИЛЬНИКИ =====
+        { category: "Светильники", name: "Светильник GVENA 05 I, встраиваемый MR16 (Н/Р) max35W, 270х110 мм", article: "ГВЕНА 05 I", qty: 15, price: "800 ₽", img: [], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/svetilniki_podvesnye_vstraevaemye_bosma_8278910408" },
+        { category: "Светильники", name: "Светильник GVENA 08 I, встраиваемый MR16 (Н/Р) max35W, 120х120 мм", article: "ГВЕНА 08 I", qty: 86, price: "800 ₽", img: [], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/svetilniki_podvesnye_vstraevaemye_bosma_8278910408" },
+        { category: "Светильники", name: "Светильник KRATO 650 I, LED 89W 3000K Ra80, INI 02 T90", article: "KRATO 650 I", qty: 6, price: "45 000 ₽", img: [], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/svetilniki_podvesnye_vstraevaemye_bosma_8278910408" },
+        { category: "Светильники", name: "Светильник KRATO 380 I, LED диммируемый (1-10В) 27Вт 3000К, SMD PET 30%", article: "КРАТО 380 I", qty: 3, price: "9 000 ₽", img: [], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/svetilniki_podvesnye_vstraevaemye_bosma_8278910408" },
+        { category: "Светильники", name: "Светильник TRU-BA 110, светодиодная лампа 62W 4000K Ra80, 1900 Ом", article: "ТРУ-БА 110", qty: 6, price: "10 000 ₽", img: [], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/svetilniki_podvesnye_vstraevaemye_bosma_8278910408" },
+        { category: "Светильники", name: "Светильник NS.2330.25.01 / RETA II SN, LED 200Вт 4000K Ra90, 6348 ПВР", article: "NS.2330.25.01 / RETA II SN", qty: 7, price: "17 000 ₽", img: [], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/svetilniki_podvesnye_vstraevaemye_bosma_8278910408" },
+        { category: "Светильники", name: "Светильник RINGO O, LED накладной 45W 4000K Ra90, 650 Ом, белый", article: "РИНГО О 45W", qty: 4, price: "8 500 ₽", img: [], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/svetilniki_podvesnye_vstraevaemye_bosma_8278910408" },
+        { category: "Светильники", name: "Светильник RINGO O, LED накладной 92W 4000K Ra90, 900 Ом, белый", article: "РИНГО О 92W", qty: 3, price: "15 000 ₽", img: [], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/svetilniki_podvesnye_vstraevaemye_bosma_8278910408" },
+        { category: "Светильники", name: "Настенный светильник Klepsos коричневый, 149х60х60 см", article: "IMR-1513572", qty: 1, price: "17 000 ₽", img: [], link: "https://www.avito.ru/moskva/mebel_i_interer/svetilnik_clepsos_nastennyy_8278948247" },
+        { category: "Светильники", name: "Настенный светильник Klepsos коричневый, 13х18х25 см", article: "IMR-1513573", qty: 3, price: "7 000 ₽", img: [], link: "https://www.avito.ru/kokoshkino/mebel_i_interer/svetilnik_clepsos_8279062422" },
+
+        // ===== РАДИАТОРЫ =====
+        { category: "Радиаторы", name: "GUARDO RETTA 6P, 330 мкр. (+100 мкр.), 1200 мкр., 7 сек., цвет 6П-1200-07 НК-ГОР-Р-ФЛ", article: "6П-1200-07 НК-ГОР-Р-ФЛ", qty: 14, price: "15 000 ₽", img: [], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/guardo_retta_radiator_8176007351" },
+        { category: "Радиаторы", name: "GUARDO RETTA 6P, 380 мкр. (+100 мкр.), 1200 мкр., 8 сек., 6П-1200-08 НК-ГОР-Р-ФЛ", article: "6П-1200-08 НК-ГОР-Р-ФЛ", qty: 2, price: "15 000 ₽", img: [], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/guardo_retta_radiator_8176007351" },
+        { category: "Радиаторы", name: "GUARDO RETTA 6P, 380 мкр. (+100 мкр.), 1600 мкр., 8 сек., 6П-1600-08 НК-ГОР-Р-ФЛ", article: "6П-1600-08 НК-ГОР-Р-ФЛ", qty: 4, price: "15 000 ₽", img: [], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/guardo_retta_radiator_8176007351" },
+        { category: "Радиаторы", name: "GUARDO RETTA 6P, 580 мкр., 800 мкр., 12 сек., правое, RAL 1013 матовый", article: "6П-0800-12 НК-ГОР-Р", qty: 1, price: "15 000 ₽", img: ["images/GUARDO RETTA 6P, 580 мм выс., 800 мм шир., 12 сек., нижн. правое, RAL 1013 матовый (пом. 27).png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/guardo_retta_radiator_8176007351" },
+        { category: "Радиаторы", name: "Комплект нижнего подключения Guardo Multiflex+ R CHR с термоголовкой, хром (правый)", article: "Multiflex+ R CHR", qty: 21, price: "15 000 ₽", img: ["images/Комплект нижнего подключения Guardo Multiflex+ R CHR с термоголовкой, хром (правый).png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/guardo_retta_radiator_8176007351" },
+
+        // ===== САНТЕХНИКА =====
+        { category: "Сантехника", name: "Смеситель для раковины Timo Saona 2361/16F, белый матовый", article: "2361/16F", qty: 4, price: "9 999 ₽", img: ["images/Смеситель для раковины Timo Saona 236116F, белый матовый.png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/smesitel_dlya_rakoviny_timo_saona_236116f_belyy_8247369927" },
+        { category: "Сантехника", name: "Смеситель для раковины-чаши Timo Saona 2311/18F, чёрное золото", article: "2311/18F", qty: 4, price: "17 999 ₽", img: ["images/Смеситель для раковины-чаши Timo Saona 231118F, чёрное золото.png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/smesiteli_dlya_rakoviny_aquatek_8279489519" },
+        { category: "Сантехника", name: "Смеситель для раковины Timo Saona 2372/18SM, чёрное золото", article: "2372/18SM", qty: 1, price: "15 999 ₽", img: ["images/Смеситель для раковины Timo Saona 237218SM, чёрное золото.png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/smesiteli_dlya_rakoviny_aquatek_8279489519" },
+        { category: "Сантехника", name: "Умывальник подвесной угловой Ceramica Nova Element, 310х430х125 мм", article: "CN5019", qty: 1, price: "7 999 ₽", img: [], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/rakoviny_8278930684" },
+        { category: "Сантехника", name: "Умывальник накладной Ceramica Nova Element прямоугольный (отв. под смеситель L)", article: "CN5008", qty: 1, price: "6 999 ₽", img: [], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/rakoviny_8278930684" },
+        { category: "Сантехника", name: "Умывальник Ceramica Nova AURA, 430х390х135 мм", article: "CN2005", qty: 2, price: "9 999 ₽", img: [], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/rakoviny_8278930684" },
+        { category: "Сантехника", name: "Раковина накладная Belbagno, овальная, 500х320х120 мм", article: "BB1497", qty: 2, price: "10 999 ₽", img: ["images/Раковина накладная Belbagno, овальная, 500x320x120 мм.png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/rakoviny_8278930684" },
+        { category: "Сантехника", name: "Раковина накладная Ceramica Nova Element, 39х39, антрацит матовый", article: "CN6022MH", qty: 2, price: "14 999 ₽", img: ["images/Раковина накладная Ceramica Nova Element, круглая, 39x39, антрацит матовый.png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/rakoviny_8278930684" },
+        { category: "Сантехника", name: "Донный клапан Ceramica Nova с керамической накладкой, антрацит матовый", article: "CN2000MH", qty: 2, price: "по запросу", img: ["images/Донный клапан Ceramica Nova с керамической накладкой, антрацит матовый.png"], link: "" },
+        { category: "Сантехника", name: "Подвесной унитаз Ceramica Nova MIA Rimless с крепежом и сиденьем с микролифтом", article: "CN1805", qty: 4, price: "15 999 ₽", img: ["images/Подвесной унитаз Ceramica Nova MIA Rimless с крепежом и сиденьем с микролифтом.png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/installyatsiya_s_unitazom_komplekt_8279600552" },
+        { category: "Сантехника", name: "Безободковый подвесной унитаз VitrA Nest (встр. смес., бачок VitrA Fresh), пластик МЛ", article: "5176B003-6233", qty: 2, price: "35 999 ₽", img: ["images/Безободковый подвесной унитаз VitrA Nest (биде, встр. смес., бачок VitrA Fresh), дюропласт МЛ.png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/installyatsiya_s_unitazom_komplekt_8279600552" },
+        { category: "Сантехника", name: "Донный клапан Ceramica Nova с керамической накладкой, белый, без перелива", article: "CN2000", qty: 3, price: "по запросу", img: ["images/Донный клапан Ceramica Nova с керамической накладкой белый, без перелива.png"], link: "" },
+        { category: "Сантехника", name: "Донный клапан Ceramica Nova с керамической накладкой, белый, с переливом", article: "CN2000x", qty: 1, price: "по запросу", img: ["images/Донный клапан Ceramica Nova с керамической накладкой, белый, с переливом.png"], link: "" },
+        { category: "Сантехника", name: "Сифон для раковины Ceramica Nova", article: "70001CH", qty: 6, price: "по запросу", img: ["images/Сифон для раковины Ceramica Nova.png"], link: "" },
+        { category: "Сантехника", name: "Донный клапан Цезарь, система Клик-клак, без перелива, белая керамическая крышка", article: "CZR-SC-Bi", qty: 2, price: "по запросу", img: ["images/Донный клапан Cezares, система Клик-клак, без перелива, белая керамическая крышка.png"], link: "" },
+        { category: "Сантехника", name: "Сифон для раковины Belbagno, хром", article: "BB-SMT2-01", qty: 2, price: "по запросу", img: ["images/Сифон для раковины Belbagno, хром.png"], link: "" },
+        { category: "Сантехника", name: "Инсталляция Geberit DuofixBasic для унитаза, 112 см, со смывной панелью Delta 12 см", article: "111.153.00.1", qty: 4, price: "18 999 ₽", img: ["images/Инсталляция Geberit DuofixBasic для подвесного унитаза, 112 см, со смывным бачком Delta 12 см.png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/installyatsiya_s_unitazom_komplekt_8279600552" },
+        { category: "Сантехника", name: "Смывная клавиша Geberit Delta50, двойной смыв, матовый хром", article: "115.119.46.1", qty: 4, price: "5 499 ₽", img: ["images/Смывная клавиша Geberit Delta50, двойной смыв, матовый хром.png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/installyatsiya_s_unitazom_komplekt_8279600552" },
+        { category: "Сантехника", name: "Инсталляция Geberit Duofix для унитаза, 112 см, со смывной панелью Сигма 12 см", article: "111.300.00.5", qty: 2, price: "19 999 ₽", img: ["images/Инсталляция Geberit Duofix для подвесного унитаза, 112 см, со смывным бачком Sigma 12 см, без крепежа к стене.png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/installyatsiya_s_unitazom_komplekt_8279600552" },
+        { category: "Сантехника", name: "Смывная клавиша Geberit Sigma01, двойной смыв, белая", article: "115.770.11.5", qty: 2, price: "3 799 ₽", img: ["images/Смывная клавиша Geberit Sigma01, двойной смыв, белый.png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/installyatsiya_s_unitazom_komplekt_8279600552" },
+        { category: "Сантехника", name: "Термостатическая душевая система Hansgrohe HG Vernis Shape Showerpipe 230", article: "26319000", qty: 1, price: "39 999 ₽", img: ["images/Термостатическая душевая система Hansgrohe HG Vernis Shape Showerpipe 230.png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/dushevaya_sistema_hansgrohe_novaya_8278941940" },
+        { category: "Сантехника", name: "Смеситель для раковины AQUATEK AQ1307BGM, с керамическим картриджем, оружейная сталь (шлиф. чёрный хром)", article: "AQ1307BGM", qty: 8, price: "6 999 ₽", img: ["images/Смеситель для раковины AQUATEK ЕВРОПА AQ1307BGM, без дон. клапана, оружейная сталь (шлиф. чёрный хром).png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/smesiteli_dlya_rakoviny_aquatek_8279489519" },
+
+       // ===== ЗЕРКАЛА =====
+{ category: "Зеркала", name: "Зеркало ZL 24, 1054х320х550 мм, горизонтальная навеска, МДФ эмаль RAL/NCS", article: "ZL 24", qty: 2, price: "25 000 ₽", img: ["images/Зеркало ZL 24, 1054x320x550 мм горизонтальная навеска МДФ эмаль RALNCS (цвет уточнить).png"], link: "https://www.avito.ru/moskva/mebel_i_interer/zerkala_zl_24_i_echo_8278975484" },
+{ category: "Зеркала", name: "Зеркало ECHO, 850х48х2100 мм, ПВС NCS S2002-B", article: "ECHO", qty: 1, price: "80 000 ₽", img: ["images/Зеркало ECHO, 850x48x2100 мм, вертикальная навеска, МДФ эмаль NCS S S2002-B.png"], link: "https://www.avito.ru/moskva/mebel_i_interer/zerkala_zl_24_i_echo_8278975484" },
+
+        // ===== МЕБЕЛЬ =====
+{ category: "Мебель", name: "ТОССБЕРГ/МАЛЬСКЕР — Поворотный стул, Гранн светокоричневый / чёрный", article: "495.082.00", qty: 6, price: "23 999 ₽", img: ["images/ТОССБЕРГ МАЛЬСКЕР — Поворотный стул, Гранн светокоричневый чёрный.png"], link: "https://www.avito.ru/moskva/mebel_i_interer/tossberg_stul_ikeya_ikea_kreslo_8279855370" },
+{ category: "Мебель", name: "HATTEFJÄLL Офисный стул с подлокотниками, Гуннаред средний серый/белый", article: "605.389.60", qty: 6, price: "29 999 ₽", img: ["images/HATTEFJÄLL Офисный стул с подлокотниками, Гуннаред средний серый белый.png"], link: "https://www.avito.ru/moskva/mebel_i_interer/kresla_ikea_ikeya_8279098217" },
+{ category: "Мебель", name: "LÅNGFJÄLL Стул рабочий, белый/синий", article: "292.525.11", qty: 1, price: "17 999 ₽", img: ["images/LÅNGFJÄLL Стул рабочий белый синий.png"], link: "https://www.avito.ru/moskva/mebel_i_interer/kresla_ikea_ikeya_8279098217" },
+{ category: "Мебель", name: "MILLBERGET Вращающееся кресло, Мурум бежевый", article: "704.893.89", qty: 5, price: "14 999 ₽", img: ["images/MILLBERGET Вращающееся Мурум бежевый.png"], link: "https://www.avito.ru/moskva/mebel_i_interer/kresla_ikea_ikeya_8279098217" },
+        { category: "Мебель", name: "MITTZON Письменный стол, шпон ясеня, чёрный, 120x60 см", article: "795.258.54", qty: 4, price: "19 999 ₽", img: ["images/MITTZON Письменный стол, шпон.png"], link: "https://www.avito.ru/moskva/mebel_i_interer/stol_ikea_mittzon_8279089312" },
+        { category: "Мебель", name: "MITTZON Настольный акустический экран, Гуннаред белый, 125x72 см", article: "405.282.12", qty: 3, price: "11 999 ₽", img: ["images/MITTZON Настольный.png"], link: "https://www.avito.ru/moskva/mebel_i_interer/stol_ikea_mittzon_8279089312" },
+        { category: "Мебель", name: "IDÅSEN Комод на колёсиках, тёмно-серый, 42х61 см", article: "303.609.82", qty: 4, price: "23 999 ₽", img: ["images/серый комод.png"], link: "https://www.avito.ru/moskva/mebel_i_interer/ikea_komod_na_kolesah_8279501940" },
+        { category: "Мебель", name: "ГАЛАНТ Комод на колёсах, ясеневый шпон, чёрный тон, 45x55 см", article: "603.651.53", qty: 1, price: "37 999 ₽", img: ["images/ГАЛАНТ Комод на колёсах, ясеневый шпон, чёрный тон, 45x55 см.png"], link: "https://www.avito.ru/moskva/mebel_i_interer/ikea_komod_na_kolesah_8279501940" },
+        { category: "Мебель", name: "ГАЛАНТ Комод на колёсах, белый, 45x55 см", article: "103.651.55", qty: 1, price: "35 999 ₽", img: ["images/ГАЛАНТ Комод на колёсах, белый, 45x55 см.png"], link: "https://www.avito.ru/moskva/mebel_i_interer/ikea_komod_na_kolesah_8279501940" },
+        { category: "Мебель", name: "Стол кофейный Уго, цвет грей беж, 25х25х55 см", article: "IMR-1485802", qty: 5, price: "4 999 ₽", img: [], link: "https://www.avito.ru/moskva/mebel_i_interer/kofeynyy_stolik_ugo_8247232299" },
+        { category: "Мебель", name: "Плинтус SX179, 2,9х9,7х200, Модерн, Orac Decor", article: "SX179", qty: 8, price: "2 800 ₽", img: ["images/Плинтус, SX179, 2,9x9,7x200, Modern, Orac Decor.png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/plintus_i_molding_8279609638" },
+        { category: "Мебель", name: "Плинтус PX209F, ЛЕНТА, 1,4х1х200, Select, Orac Decor", article: "PX209F", qty: 15, price: "2 600 ₽", img: ["images/Молдинг, PX209F, RIBBON, 1,4x1x200, Select, Orac.png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/plintus_i_molding_8279609638" },
+        { category: "Мебель", name: "Плинтус SX194, 1x2x200, Select, Orac Decor", article: "SX194", qty: 16, price: "600 ₽", img: ["images/Плинтус, SX194, 1x2x200, Select, Orac Decor.png"], link: "https://www.avito.ru/moskva/remont_i_stroitelstvo/plintus_i_molding_8279609638" }
+    ];
+
+    // ================================================================
+    // ФУНКЦИЯ СОЗДАНИЯ КАРУСЕЛИ (слайдера)
+    // ================================================================
+    function createCarousel(images) {
+        if (!images || images.length === 0) {
+            const div = document.createElement('div');
+            div.className = 'card-img-placeholder';
+            div.textContent = '🖼️ Фото нет';
+            return div;
+        }
+        if (images.length === 1) {
+            const div = document.createElement('div');
+            div.className = 'carousel-container';
+            // Добавляем обработчик ошибки для одиночного изображения
+            div.innerHTML = `<img src="${images[0]}" alt="Товар" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'card-img-placeholder\\'>🖼️ Фото не загружено</div>';">`;
+            return div;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'carousel-container';
+
+        const slidesWrapper = document.createElement('div');
+        slidesWrapper.className = 'carousel-slides';
+
+        images.forEach((src, index) => {
+            const slide = document.createElement('div');
+            slide.className = 'carousel-slide';
+            slide.innerHTML = `<img src="${src}" alt="Фото ${index+1}" onerror="this.onerror=null; this.style.display='none'; this.parentElement.textContent='🖼️ Фото не загружено'; this.parentElement.style.background='#e9edf2'; this.parentElement.style.color='#94a3b8'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center';">`;
+            slidesWrapper.appendChild(slide);
+        });
+
+        container.appendChild(slidesWrapper);
+
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'carousel-btn prev';
+        prevBtn.innerHTML = '‹';
+        prevBtn.setAttribute('aria-label', 'Предыдущий');
+
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'carousel-btn next';
+        nextBtn.innerHTML = '›';
+        nextBtn.setAttribute('aria-label', 'Следующий');
+
+        container.appendChild(prevBtn);
+        container.appendChild(nextBtn);
+
+        const dotsContainer = document.createElement('div');
+        dotsContainer.className = 'carousel-dots';
+        images.forEach((_, index) => {
+            const dot = document.createElement('button');
+            dot.className = 'carousel-dot' + (index === 0 ? ' active' : '');
+            dot.setAttribute('data-index', index);
+            dot.setAttribute('aria-label', `Слайд ${index+1}`);
+            dotsContainer.appendChild(dot);
+        });
+        container.appendChild(dotsContainer);
+
+        let currentIndex = 0;
+        const totalSlides = images.length;
+
+        function updateCarousel(index) {
+            if (index < 0) index = totalSlides - 1;
+            if (index >= totalSlides) index = 0;
+            currentIndex = index;
+            const offset = -index * 100;
+            slidesWrapper.style.transform = `translateX(${offset}%)`;
+            const dots = dotsContainer.querySelectorAll('.carousel-dot');
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        }
+
+        prevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            updateCarousel(currentIndex - 1);
+        });
+
+        nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            updateCarousel(currentIndex + 1);
+        });
+
+        dotsContainer.querySelectorAll('.carousel-dot').forEach((dot) => {
+            dot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const index = parseInt(dot.getAttribute('data-index'), 10);
+                updateCarousel(index);
+            });
+        });
+
+        slidesWrapper.addEventListener('click', (e) => e.stopPropagation());
+
+        return container;
+    }
+
+    // ================================================================
+    // ОСНОВНАЯ ФУНКЦИЯ ОТРИСОВКИ КАТАЛОГА
+    // ================================================================
+    function renderCatalog(filterCat = 'all', searchText = '') {
+        const container = document.getElementById('catalogContainer');
+        container.innerHTML = '';
+
+        let filtered = data;
+        if (filterCat !== 'all') {
+            filtered = filtered.filter(item => item.category === filterCat);
+        }
+        if (searchText.trim() !== '') {
+            const s = searchText.toLowerCase().trim();
+            filtered = filtered.filter(item =>
+                item.name.toLowerCase().includes(s) ||
+                (item.article && item.article.toLowerCase().includes(s))
+            );
+        }
+
+        const grouped = {};
+        filtered.forEach(item => {
+            if (!grouped[item.category]) grouped[item.category] = [];
+            grouped[item.category].push(item);
+        });
+
+        const sortedCats = Object.keys(grouped).sort();
+
+        if (sortedCats.length === 0) {
+            container.innerHTML = '<p style="color:#64748b; margin-top:30px;">🚫 Товары не найдены</p>';
+            return;
+        }
+
+        sortedCats.forEach(cat => {
+            const items = grouped[cat];
+            const section = document.createElement('div');
+            section.innerHTML = `<div class="category-title">${cat}</div>`;
+            const grid = document.createElement('div');
+            grid.className = 'grid';
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                const carouselElement = createCarousel(item.img);
+                card.appendChild(carouselElement);
+
+                const body = document.createElement('div');
+                body.className = 'card-body';
+
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'name';
+                nameDiv.textContent = item.name;
+
+                const articleDiv = document.createElement('div');
+                articleDiv.className = 'article';
+                articleDiv.textContent = item.article ? `📌 Арт. ${item.article}` : '';
+
+                const qtyDiv = document.createElement('div');
+                qtyDiv.className = 'qty';
+                qtyDiv.textContent = `📦 В наличии: ${item.qty} шт.`;
+
+                const priceDiv = document.createElement('div');
+                priceDiv.className = 'price';
+                priceDiv.innerHTML = `${item.price} <span>за шт.</span>`;
+
+                body.appendChild(nameDiv);
+                body.appendChild(articleDiv);
+                body.appendChild(qtyDiv);
+                body.appendChild(priceDiv);
+
+                if (item.link) {
+                    const linkBtn = document.createElement('a');
+                    linkBtn.className = 'link-btn';
+                    linkBtn.href = item.link;
+                    linkBtn.target = '_blank';
+                    linkBtn.innerHTML = '🔗 Перейти к товару';
+                    body.appendChild(linkBtn);
+                } else {
+                    const noLink = document.createElement('div');
+                    noLink.className = 'no-link';
+                    noLink.textContent = '🔜 Скоро появится';
+                    body.appendChild(noLink);
+                }
+
+                card.appendChild(body);
+                grid.appendChild(card);
+            });
+
+            section.appendChild(grid);
+            container.appendChild(section);
+        });
+    }
+
+    // ===== ФИЛЬТРЫ =====
+    document.querySelectorAll('#filterButtons button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('#filterButtons button').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const cat = this.dataset.cat;
+            const searchVal = document.getElementById('searchInput').value;
+            renderCatalog(cat, searchVal);
+        });
+    });
+
+    function filterCards() {
+        const activeCat = document.querySelector('#filterButtons button.active')?.dataset.cat || 'all';
+        const searchVal = document.getElementById('searchInput').value;
+        renderCatalog(activeCat, searchVal);
+    }
+
+    function exportPDF() {
+        const btn = document.getElementById('pdfBtn');
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Создание PDF...';
+
+        if (typeof html2pdf === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+            script.onload = function() {
+                generatePDF();
+            };
+            document.head.appendChild(script);
+        } else {
+            generatePDF();
+        }
+
+        function generatePDF() {
+            const element = document.getElementById('catalogContainerRoot');
+            const opt = {
+                margin: [10, 10, 10, 10],
+                filename: 'Техноулыбка_каталог.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.disabled = false;
+                btn.innerHTML = '📄 Скачать PDF';
+            }).catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = '📄 Скачать PDF';
+                alert('Не удалось сгенерировать PDF. Используйте Ctrl+P -> "Сохранить как PDF"');
+            });
+        }
+    }
+
+    // ===== СТАРТ =====
+    renderCatalog('all', '');
+</script>
+</body>
+</html>
